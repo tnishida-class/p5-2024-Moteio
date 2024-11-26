@@ -1,20 +1,5 @@
 // 最終課題を制作しよう
 
-function setup89{
-  createCanvas(windowwidrh,windiowHeight);
-}
-
-function draw() {
-  background(160, 192, 255);
-
-  if(mouseIsPressed)
-  elipse(rondom(width), rondom(height), 50);
- }
-
-function windowResized(){
-  resizeCanvas(windowwidth, windowHeight);
-}
-
 // 一般・宣言
 let player;
 let bullets = [];
@@ -23,7 +8,7 @@ let enemyBullets = [];
 let enemyDirection = 1;
 let score = 0;
 let gameOver = false;
-let retryButton
+let retryButton;
 let explosions = [];
 let level = 1;
 let enemySpeed = 0.5;
@@ -466,13 +451,106 @@ function checkCollisions() {
 }
 
 function checkBulletHits() {
-  bullets = bullets.filter(bullet => ) {
+  bullets = bullets.filter(bullet => {
     let hit = false;
-    enemies.forEach(enemy =>) {
+    enemies.forEach(enemy => {
       if (enemy.alive && bulletHitsEnemy(bullet, enemy)) {
         enemy.health -= 1;
         if (enemy.health <= 0) {
           enemy.alive = false;
           score += 10;
-          createExplosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, enemy.colors[enemy.colors.length])
- }
+          createExplosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, enemy.colors[enemy.colors.length - 1]);
+        }
+        hit = true;
+      }
+    });
+    return !hit;
+  });
+}
+
+function checkPlayerHit() {
+  enemyBullets = enemyBullets.filter(bullet => {
+    if (bulletHitsPlayer(bullet, player)) {
+      gameOver = true;
+      return false;
+    }
+    return true;
+  });
+
+  enemies.forEach(enemy => {
+    if (enemy.alive && enemy.y + enemy.h >= player.y) {
+      gameOver = true;
+    }
+  });
+}
+
+// ===== 当たり判定の関数 =====
+function bulletHitsEnemy(bullet, enemy) {
+  return bullet.x < enemy.x + enemy.w &&
+         bullet.x + bullet.w > enemy.x &&
+         bullet.y < enemy.y + enemy.h &&
+         bullet.y + bullet.h > enemy.y;
+}
+
+function bulletHitsPlayer(bullet, player) {
+  return bullet.x < player.x + player.w &&
+         bullet.x + bullet.w > player.x &&
+         bullet.y < player.y + player.h &&
+         bullet.y + bullet.h > player.y;
+}
+
+// ===== ゲームオーバー時の表示 =====
+function displayGameOver() {
+  // 背景を半透明の黒で覆う
+  fill(0, 0, 0, 200);
+  rect(0, 0, width, height);
+
+  // ゲームオーバーのテキスト
+  textSize(60);
+  fill(255, 0, 0);
+  textAlign(CENTER, CENTER);
+  text('GAME OVER', width / 2, height / 2 - 40);
+
+  // スコアの表示
+  textSize(30);
+  fill(255);
+  text('スコア: ' + score, width / 2, height / 2 + 10);
+
+  retryButton.show();
+  noLoop();
+}
+
+// ===== リトライボタンを非表示にする関数 =====
+function hideRetryButton() {
+  if (retryButton.elt.style.display !== 'none') {
+    retryButton.hide();
+  }
+}
+
+// ===== スコアの表示 =====
+function displayScore() {
+  fill(255);
+  textSize(24);
+  textAlign(LEFT, TOP);
+  text('スコア: ' + score, 10, 10);
+  text('レベル: ' + level, 10, 40); // レベルの表示
+}
+
+// ===== ゲームをリスタートする関数 =====
+function restartGame() {
+  player = createPlayer();
+  bullets = [];
+  enemies = [];
+  enemyBullets = [];
+  enemyDirection = 1;
+  score = 0;
+  gameOver = false;
+  explosions = [];
+  level = 1;
+  enemySpeed = 0.5;
+  lastKeyPressed = null;
+
+  createEnemies();
+  retryButton.hide();
+  loop();
+}
